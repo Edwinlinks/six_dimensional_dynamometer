@@ -5,9 +5,9 @@
 
 int main(int argc, char **argv){
 
-    ModbusRtu *mb = new ModbusRtu(port, slave_id, baud, parity, data_bit, stop_bit);
+    ModbusRtu *dynamometer = new ModbusRtu(port, slave_id, baud, parity, data_bit, stop_bit);
     // RTU
-    mb->setSerialMode(MODBUS_RTU_RS485);
+    dynamometer->setSerialMode(MODBUS_RTU_RS485);
 
     uint16_t *date{};
     double forceX_1, forceX_2, forceY_1, forceY_2, forceZ_1, forceZ_2;
@@ -17,8 +17,8 @@ int main(int argc, char **argv){
 
     while (TRUE){
         usleep(200*1000);
-        mb->Flush();
-        date = mb->readRegisters(address, number);
+        dynamometer->Flush();
+        date = dynamometer->readRegisters(address, number);
         forceX_1 = (date[1] <<8) | (date[2]);
         forceX_2 = (date[3] <<8) | (date[4]);
         forceY_1 = (date[5] <<8) | (date[6]);

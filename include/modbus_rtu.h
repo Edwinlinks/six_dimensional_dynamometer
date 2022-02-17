@@ -18,11 +18,10 @@ class ModbusRtu {
             const int data_bit,
             const int stop_bit);
   ~ModbusRtu();
-  int readRegisters(const int start_address, const int register_number);
-  int writeRegisters(const int start_address, const int register_number, const uint16_t *data);
-  void print(const int start_address, const int stop_address);
+  uint16_t *readRegisters(const int start_address, const int register_number);
+  void setSerialMode(int mode);
+  void Flush();
 
  private:
-  uint16_t *read_registers_array_{}, *write_registers_data_{};
   modbus_t *modbus_{};
 };

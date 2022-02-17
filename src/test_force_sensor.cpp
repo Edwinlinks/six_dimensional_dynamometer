@@ -1,6 +1,4 @@
-//
-// Created by huakang on 2021/2/3.
-//
+// this code is using for testing
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -8,6 +6,7 @@
 #include <cstring>
 #include <cerrno>
 #include <modbus.h>
+#include "modbus_rtu.h"
 
 const int server_id = 1;
 const char *port = "/dev/ttyUSB0";
@@ -15,14 +14,12 @@ const int baud = 115200;
 const char parity = 'N';
 const int data_bit = 8;
 const int stop_bit = 1;
-const int address = 0x01f4;
+const uint16_t address = 0x01f4;
 const int number = 16;
 int main(int argc, char **argv){
   modbus_t *mb;
   int rc;
-  uint16_t *tab_rp_reg, *tab_rq_reg;
-  tab_rp_reg = (uint16_t *)malloc((number+1) * sizeof(uint16_t));
-  memset(tab_rp_reg, 0, (number+1) * sizeof(uint16_t));
+  uint16_t *tab_rq_reg;
   tab_rq_reg = (uint16_t *)malloc((number+1) * sizeof(uint16_t));
   memset(tab_rq_reg, 0, (number+1) * sizeof(uint16_t));
 
@@ -36,12 +33,14 @@ int main(int argc, char **argv){
 
   // read information form force sensor
   modbus_rtu_set_serial_mode (mb, MODBUS_RTU_RS485);
+
+  if (modbus_connect(mb) == -1){
+      std::cout << stderr << "Connection failed: " << modbus_strerror(errno) << std::endl;
+      modbus_free(mb);
+      return -1;
+  }
+
   while (TRUE){
-      if (modbus_connect(mb) == -1){
-          std::cout << stderr << "Connection failed: " << modbus_strerror(errno) << std::endl;
-          modbus_free(mb);
-          return -1;
-      }
       usleep(200*1000);
       modbus_flush(mb);
       rc = modbus_read_registers(mb, address, number, tab_rq_reg);
@@ -63,7 +62,7 @@ int main(int argc, char **argv){
   // close the connection
   close:
     /* Free the memory */
-    free(tab_rp_reg);
+    free(tab_rq_reg);
     // free(tab_rp_registers);
 
     /* Close the connection */

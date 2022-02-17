@@ -15,16 +15,16 @@ const int baud = 115200;
 const char parity = 'N';
 const int data_bit = 8;
 const int stop_bit = 1;
-const int address = 0x201;
-const int number = 8;
+const int address = 0x01f4;
+const int number = 16;
 int main(int argc, char **argv){
   modbus_t *mb;
   int rc;
   uint16_t *tab_rp_reg, *tab_rq_reg;
-  tab_rp_reg = (uint16_t *)malloc(number * sizeof(uint16_t));
-  memset(tab_rp_reg, 0, number * sizeof(uint16_t));
-  tab_rq_reg = (uint16_t *)malloc(number * sizeof(uint16_t));
-  memset(tab_rq_reg, 0, number * sizeof(uint16_t));
+  tab_rp_reg = (uint16_t *)malloc((number+1) * sizeof(uint16_t));
+  memset(tab_rp_reg, 0, (number+1) * sizeof(uint16_t));
+  tab_rq_reg = (uint16_t *)malloc((number+1) * sizeof(uint16_t));
+  memset(tab_rq_reg, 0, (number+1) * sizeof(uint16_t));
 
   // RTU
   mb = modbus_new_rtu(port, baud, parity, data_bit, stop_bit);
@@ -42,7 +42,8 @@ int main(int argc, char **argv){
           modbus_free(mb);
           return -1;
       }
-      sleep(1);
+      usleep(200*1000);
+      modbus_flush(mb);
       rc = modbus_read_registers(mb, address, number, tab_rq_reg);
       if (rc == -1){
           std::cout << "Error modbus_read_registers" << std::endl;
@@ -52,6 +53,10 @@ int main(int argc, char **argv){
       for (int i = 0; i < rc; i++){
           std::cout << "reg" << i << "=" << tab_rq_reg[i] << "  ";
           std::cout << "rc" << rc << std::endl;
+          uint16_t g1 = (tab_rq_reg[4] <<8) | (tab_rq_reg[5]);
+          uint16_t g2 = (tab_rq_reg[6] <<8) | (tab_rq_reg[7]);
+          printf("g1 = %d/n",g1);
+          printf("g2 = %d/n",g2);
       }
 
   }
